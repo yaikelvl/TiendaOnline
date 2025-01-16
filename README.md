@@ -6,14 +6,23 @@
 
 # Tienda Online
 
-1. Instalar los modulos de Node.
+1. Clonar proyecto
+
+2. Instalar los modulos de Node.
 ```
 yarn install
 ```
 
-2. Levantar la Base de Datos.
+3. Levantar la Base de Datos.
 ```
 docker-compose up -d
 ```
 
-3. Renombrar el fichero ```.env.template``` a ```.env```
+4. Renombrar el fichero ```.env.template``` a ```.env```
+
+5. Cambiar las variables de entorno.
+
+6. Levantar modo de desarrollo.
+```
+yarn start:dev
+```
