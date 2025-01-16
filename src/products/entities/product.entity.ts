@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { BeforeInsert, BeforeUpdate, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { Unit } from '../enums/unit.enum';
 
 @Entity()
@@ -21,4 +21,17 @@ export class Product {
   @Column('text')
   unit: Unit;
 
+  @BeforeInsert()
+  slugifyTitle() {
+    if (!this.slug) {
+      this.slug = this.title;
+    }
+
+    this.slug = this.slug
+      .replaceAll(' ', '_')
+      .replaceAll("'", '')
+      .toLowerCase();
+  }
+
+  // @BeforeUpdate()
 }
