@@ -13,8 +13,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       host: process.env.DB_HOST,
       port: parseInt(process.env.DB_PORT), // convert string to number tambien se puede usar de la sigiente forma +process.env.DB_PORT.
       database: process.env.DB_NAME,
-      username: process.env.DB_USERNAME,
+      username: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
+      autoLoadEntities: true,
+      synchronize: true,
     }),
   ],
   controllers: [AppController],
