@@ -1,4 +1,10 @@
-import { BeforeInsert, BeforeUpdate, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BeforeInsert,
+  BeforeUpdate,
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Unit } from '../enums/unit.enum';
 
 @Entity()
@@ -21,8 +27,14 @@ export class Product {
   @Column('text')
   unit: Unit;
 
+  @Column('text', { array: true, default: [] })
+  tags: string[];
+
+  @Column('boolean', { default: true })
+  available: boolean;
+
   @BeforeInsert()
-  slugifyTitle() {
+  checkSlugInsert() {
     if (!this.slug) {
       this.slug = this.title;
     }
@@ -33,5 +45,11 @@ export class Product {
       .toLowerCase();
   }
 
-  // @BeforeUpdate()
+  @BeforeUpdate()
+  checkSlugUpdate() {
+    this.slug = this.slug
+      .replaceAll(' ', '_')
+      .replaceAll("'", '')
+      .toLowerCase();
+  }
 }

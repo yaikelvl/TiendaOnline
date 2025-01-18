@@ -5,11 +5,15 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+
+import { UpdateProductDto } from './dto/update-product.dto';
+import { CreateProductDto } from './dto/create-product.dto';
 import { Product } from './entities/product.entity';
+import { PaginationDto } from 'src/common';
+
+import { validate as isUUID } from 'uuid';
 
 @Injectable()
 export class ProductsService {
@@ -31,25 +35,88 @@ export class ProductsService {
     }
   }
 
-  findAll() {
-    return this.productRepository.find();
+  async findAll(paginationDto: PaginationDto) {
+    const { page, limit } = paginationDto;
+
+    const totalPages = await this.productRepository.count({
+      where: {
+        available: true,
+      },
+    });
+    const lastPage = Math.ceil(totalPages / limit);
+
+    const product = {
+      data: await this.productRepository.find({
+        skip: (page - 1) * limit,
+        take: limit,
+        where: {
+          available: true,
+        },
+      }),
+      meta: {
+        total: totalPages,
+        page: page,
+        lastPage: lastPage,
+      },
+    };
+
+    const { data, meta } = product;
+    const productDetails = data.map(({ id, title, price, slug, unit }) => ({
+      id,
+      title,
+      price,
+      slug,
+      unit,
+    }));
+
+    return { productDetails, meta };
   }
 
-  async findOne(id: string) {
-   const product = await this.productRepository.findOneBy({id});
-       if (!product) throw new NotFoundException(`Product ${id} not found`);
-   
-       return product;
+  async findOne(term: string) {
+    let product: Product;
+
+    if (isUUID(term)) {
+      product = await this.productRepository.findOneBy({
+        id: term,
+        available: true,
+      });
+    } else {
+      const queryBulder = this.productRepository.createQueryBuilder();
+      product = await queryBulder
+        .where('UPPER(title) =:title or slug =:slug and available = true', {
+          title: term.toUpperCase(),
+          slug: term.toLowerCase(),
+        })
+        .getOne();
+    }
+    if (!product) throw new NotFoundException(`Product ${term} not found`);
+
+    return product;
   }
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`;
+  async update(id: string, updateProductDto: UpdateProductDto) {
+    const product = await this.productRepository.preload({
+      id,
+      ...updateProductDto,
+    });
+
+    if (!product) throw new NotFoundException(`Product ${id} not found`);
+
+    try {
+      await this.productRepository.save(product);
+      return product;
+    } catch (error) {
+      this.handelExeption(error);
+    }
   }
 
   async remove(id: string) {
-    const product = await this.findOne(id);
+    await this.findOne(id);
 
-    return await this.productRepository.remove(product);
+    const product = await this.update(id, { available: false });
+
+    return product;
+    //return await this.productRepository.remove(product);
   }
 
   private handelExeption(error: any) {

@@ -1,4 +1,13 @@
-import { IsEnum, IsNumber, IsOptional, IsPositive, IsString, MinLength } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsPositive,
+  IsString,
+  MinLength,
+} from 'class-validator';
 import { Unit } from '../enums/unit.enum';
 
 export class CreateProductDto {
@@ -16,9 +25,18 @@ export class CreateProductDto {
 
   @IsString()
   @IsOptional()
-  slug?: string;
+  slug: string;
 
   @IsEnum(Unit)
   @IsString()
   unit: Unit;
+
+  @IsOptional()
+  @IsString({ each: true })
+  @IsArray()
+  tags: string[];
+
+  @IsOptional()
+  @IsBoolean()
+  available?: boolean;
 }
