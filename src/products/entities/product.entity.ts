@@ -3,9 +3,11 @@ import {
   BeforeUpdate,
   Column,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Unit } from '../enums/unit.enum';
+import { ProductImage } from './product-image.entity';
 
 @Entity()
 export class Product {
@@ -33,6 +35,13 @@ export class Product {
   @Column('boolean', { default: true })
   available: boolean;
 
+  @OneToMany(
+    () => ProductImage,
+    (productImage) => productImage.product,
+    { cascade: true },
+  )
+  images?: ProductImage[];
+
   @BeforeInsert()
   checkSlugInsert() {
     if (!this.slug) {
@@ -52,4 +61,6 @@ export class Product {
       .replaceAll("'", '')
       .toLowerCase();
   }
+
+
 }
