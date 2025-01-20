@@ -18,6 +18,7 @@ import { ProductImage, Product } from './entities';
 @Injectable()
 export class ProductsService {
   private readonly logger = new Logger('ProductsService');
+  manager: any;
 
   constructor(
     @InjectRepository(Product)
@@ -156,7 +157,6 @@ export class ProductsService {
 
       return this.findOnePlane(id);
     } catch (error) {
-
       await queryRunner.rollbackTransaction();
       await queryRunner.release();
       this.handelExeption(error);
@@ -164,12 +164,30 @@ export class ProductsService {
   }
 
   async remove(id: string) {
-    await this.findOne(id);
+    // const product = await this.findOnePlane(id);
+    // console.log(product);
+    // await this.productRepository.update(id, { available: false });
+    // if (product.images) {
+    //   await this.productImageRepository.update(
+    //     { product: { id: product.id } },
+    //     { available: false },
+    //   );
 
-    const product = await this.update(id, { available: false });
+    //   /*Esta es otra forma de poder trabajar con un repositorio si haberlo declarado en el constructor*/
 
-    return product;
-    //return await this.productRepository.remove(product);
+    //   // const imageRepo = this.manager.getRepository(ProductImage);
+    //   // await imageRepo.update(
+    //   //   { product: { id: productId } },
+    //   //   { available: false }
+    //   // );
+    // }
+    // return product;
+
+    //await this.productRepository.delete(id);
+    /*Otra forma de hacerlo puede ser esta*/
+
+    const product = await this.findOne(id);
+    return await this.productRepository.remove(product);
   }
 
   private handelExeption(error: any) {
@@ -179,5 +197,16 @@ export class ProductsService {
     throw new InternalServerErrorException(
       'Unexpecte error, check server logs',
     );
+  }
+
+  async deleteAllProducts() {
+    const query = this.productRepository.createQueryBuilder('product');
+
+    try {
+      return await query.delete().where({}).execute();
+      
+    } catch (error) {
+      this.handelExeption(error);
+    }
   }
 }
