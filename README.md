@@ -12,17 +12,21 @@
 ```
 yarn install
 ```
+3. Renombrar el fichero ```.env.template``` a ```.env```
 
-3. Levantar la Base de Datos.
+4. Cambiar las variables de entorno.
+
+5. Levantar la Base de Datos.
 ```
 docker-compose up -d
 ```
 
-4. Renombrar el fichero ```.env.template``` a ```.env```
+6. Ejecutar SEED para poblar la Base de Datos.
+```
+http://localhost:3000/api/seed/
+```
 
-5. Cambiar las variables de entorno.
-
-6. Levantar modo de desarrollo.
+7. Levantar modo de desarrollo.
 ```
 yarn start:dev
 ```

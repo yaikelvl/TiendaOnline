@@ -9,7 +9,7 @@ import {
 import { Unit } from '../enums/unit.enum';
 import { ProductImage } from './product-image.entity';
 
-@Entity()
+@Entity({ name: 'products' })
 export class Product {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -35,13 +35,10 @@ export class Product {
   @Column('boolean', { default: true })
   available: boolean;
 
-  @OneToMany(
-    () => ProductImage,
-    (productImage) => productImage.product,
-    { cascade: true,
-      eager: true
-     },
-  )
+  @OneToMany(() => ProductImage, (productImage) => productImage.product, {
+    cascade: true,
+    eager: true,
+  })
   images?: ProductImage[];
 
   @BeforeInsert()
@@ -63,6 +60,4 @@ export class Product {
       .replaceAll("'", '')
       .toLowerCase();
   }
-
-
 }
